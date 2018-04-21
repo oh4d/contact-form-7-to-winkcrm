@@ -6,33 +6,87 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 class CF7_To_WinkCrm_Api
 {
-    protected $credentialsToken;
+    private static $credentialsToken;
 
-    public function __construct($credentialsToken = null)
+    /**
+     * @param null $credentialsToken
+     * @throws Exception
+     */
+    private static function initialize($credentialsToken = null)
     {
         if (!$credentialsToken){
-            wp_die('Error Initializing WinkCrm API Credentials');
+            throw new \Exception(__('Error Initializing WinkCrm API Credentials'));
         }
 
-        $this->credentialsToken = $credentialsToken;
+        self::$credentialsToken = $credentialsToken;
     }
 
-    public function import_contacts($data)
+    /**
+     * Check Auth Token
+     *
+     * @param $credentialsToken
+     * @return array|string
+     */
+    public static function check_auth_token($credentialsToken)
     {
-        $url = CF7_TO_WINKCRM_API_URL . CF7_TO_WINKCRM_AT_ENDPOINT_CONTACT_IMPORT;
+        try
+        {
+            self::initialize($credentialsToken);
 
-        $data_string = '';
-        if($data)
-            $data_string = json_encode($data);
+            $url = CF7_TO_WINKCRM_CHECK_AUTH;
+            return self::send($url, 'get');
+        }
+        catch (\Exception $e)
+        {
+            return $e->getMessage();
+        }
+    }
+
+    /**
+     * Import New Lead
+     *
+     * @param $credentialsToken
+     * @param $data
+     * @return array|string
+     */
+    public static function import_lead($credentialsToken, $data)
+    {
+        try
+        {
+            self::initialize($credentialsToken);
+
+            $url = CF7_TO_WINKCRM_NEW_LEAD;
+            return self::send($url, 'post', $data);
+        }
+        catch (\Exception $e)
+        {
+            return $e->getMessage();
+        }
+    }
+
+    /**
+     * Send Request To API
+     *
+     * @param $url
+     * @param $method
+     * @param null $params
+     * @return array
+     */
+    private static function send($url, $method, $params = null)
+    {
+        $params_string = '';
+
+        if ($params)
+            $params_string = json_encode($params);
 
         $args = array(
             'headers' => array(
-                'X_PROJECT_TOKEN' => $this->credentialsToken,
+                'X_PROJECT_TOKEN' => self::$credentialsToken,
                 'Content-Type' => 'application/json; charset=utf-8',
-                'Content-Length' => strlen($data_string)
+                'Content-Length' => strlen($params_string)
             ),
-            'method' => 'POST',
-            'body' => $data_string,
+            'method' => strtoupper($method),
+            'body' => $params_string,
             'timeout' => '5',
             'redirection' => '5',
             'httpversion' => '1.0',
@@ -40,9 +94,9 @@ class CF7_To_WinkCrm_Api
             'cookies' => array()
         );
 
-        $response = wp_remote_post( $url, $args );
-        $body = wp_remote_retrieve_body( $response );
+        $response = wp_remote_post($url, $args);
+        $body = wp_remote_retrieve_body($response);
 
-        return $body;
+        return ['body' => json_decode($body, true), 'response' => $response];
     }
 }

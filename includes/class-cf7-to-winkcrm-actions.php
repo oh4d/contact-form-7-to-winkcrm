@@ -15,20 +15,18 @@ class CF7_To_WinkCrm_Actions
     }
 
     /**
-     * @param $cf7
+     * @param WPCF7_ContactForm $contact_form
      */
-    public function cf7_lead_post($cf7)
+    public function cf7_lead_post($contact_form)
     {
         $submission = WPCF7_Submission::get_instance();
-        $token = get_post_meta($cf7->id(),'winkcrm_token_id', true);
+        $token = get_post_meta($contact_form->id(),'winkcrm_token_id', true);
 
         if (!$token)
             return;
 
         $data = $this->clean_private_keys($submission->get_posted_data());
-
-        $api = new CF7_To_WinkCrm_Api($token);
-        $response = $api->import_contacts($data);
+        $response = cf7_to_winkcrm_new_lead($token, $data);
     }
 
     /**

@@ -61,6 +61,7 @@ class CF7_To_WinkCrm
      */
     public function includes()
     {
+        require_once("{$this->includes_path}/functions.php");
         require_once("{$this->includes_path}/constants-winkcrm.php");
         require_once("{$this->includes_path}/class-cf7-to-winkcrm-api.php");
         require_once("{$this->includes_path}/class-cf7-to-winkcrm-actions.php");
