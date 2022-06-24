@@ -38,6 +38,10 @@ class CF7_To_WinkCrm_Actions
         foreach ($fields as $key => $field) {
             if (substr($key,0,6) === "_wpcf7")
                 unset($fields[$key]);
+
+            if (is_array($field)) {
+                $fields[$key] = implode(', ', $field);
+            }
         }
 
         return $fields;

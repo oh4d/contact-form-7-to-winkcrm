@@ -81,7 +81,7 @@ class CF7_To_WinkCrm_Api
 
         $args = array(
             'headers' => array(
-                'X_PROJECT_TOKEN' => self::$credentialsToken,
+                'X-PROJECT-TOKEN' => self::$credentialsToken,
                 'Content-Type' => 'application/json; charset=utf-8',
                 'Content-Length' => strlen($params_string)
             ),
